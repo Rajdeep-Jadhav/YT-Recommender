@@ -1,5 +1,6 @@
-spotipy==2.22.0
-ytmusicapi==0.15.0
-fuzzywuzzy==0.18.0
-python-Levenshtein==0.12.2
-streamlit==1.24.0
+streamlit
+spotipy
+ytmusicapi
+fuzzywuzzy
+python-Levenshtein
+pillow==9.4.0
