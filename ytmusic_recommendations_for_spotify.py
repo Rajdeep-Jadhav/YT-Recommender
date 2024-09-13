@@ -19,7 +19,7 @@ st.markdown(sofia_font, unsafe_allow_html=True)
 st.markdown('<div class="header">S2Y</div>', unsafe_allow_html=True)
 SPOTIPY_CLIENT_ID = '88877ed106c94563ae58b06033ae55ac'
 SPOTIPY_CLIENT_SECRET = '47118fc261b542cdbf4f7784f7928423'
-SPOTIPY_REDIRECT_URI = 'https://s2y-recommender.streamlit.app/callback'
+SPOTIPY_REDIRECT_URI = 'https://localhost:5000/callback'
 
 scope = "playlist-read-private"
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
