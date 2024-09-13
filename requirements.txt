@@ -5,3 +5,5 @@ ytmusicapi==0.22.0
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
 pillow==8.4.0
+spotipy==2.23.0
+requests==2.31.0  # Optional, included in spotipy dependencies
