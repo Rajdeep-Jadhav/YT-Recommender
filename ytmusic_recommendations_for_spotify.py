@@ -27,34 +27,6 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                redirect_uri=SPOTIPY_REDIRECT_URI,
                                                scope=scope))
 
-auth_url = sp_oauth.get_authorize_url()
-
-# Step 1: Show the link to authorize the app
-st.write("### Step 1: Authorize the app")
-st.write(f"[Click here to authorize]({auth_url})")
-
-# Step 2: User manually pastes the redirect URL they were redirected to
-redirected_url = st.text_input('Enter the URL you were redirected to after authorization', '')
-
-if redirected_url:
-    try:
-        # Step 3: Use the redirected URL to get the access token
-        code = sp_oauth.parse_response_code(redirected_url)
-        token_info = sp_oauth.get_access_token(code)
-
-        if token_info:
-            st.write("### Authorization successful!")
-            # Initialize Spotify client with the new token
-            sp = spotipy.Spotify(auth=token_info['access_token'])
-            # Now you can proceed with fetching playlists, etc.
-            
-            # Example: Get current user's playlists
-            playlists = sp.current_user_playlists(limit=10)
-            for playlist in playlists['items']:
-                st.write(playlist['name'])
-
-    except Exception as e:
-        st.write(f"Error: {e}")
 
 # YouTube Music API initialization
 ytmusic = YTMusic()
