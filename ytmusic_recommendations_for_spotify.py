@@ -26,7 +26,31 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                client_secret=SPOTIPY_CLIENT_SECRET,
                                                redirect_uri=SPOTIPY_REDIRECT_URI,
                                                scope=scope))
+# Step 1
+auth_url = sp_oauth.get_authorize_url()
 
+# Step 2: Display the URL for authorization
+st.markdown(f"### [Click here to authorize Spotify access]({auth_url})")
+
+# Step 3: Get the current URL in the browser (to capture the redirect URL)
+url = st.experimental_get_query_params()
+
+if 'code' in url:
+    # Step 4: Extract the authorization code from the URL
+    code = url['code'][0]  # Extract the first element of the 'code' parameter
+    
+    # Step 5: Get the access token
+    token_info = sp_oauth.get_access_token(code)
+    access_token = token_info.get('access_token')
+
+    if access_token:
+        # Initialize Spotify client with access token
+        sp = spotipy.Spotify(auth=access_token)
+        st.success("Successfully authorized with Spotify!")
+        
+        # Your Spotify API calls can now be made here
+    else:
+        st.error("Failed to retrieve access token.")
 
 # YouTube Music API initialization
 ytmusic = YTMusic()
