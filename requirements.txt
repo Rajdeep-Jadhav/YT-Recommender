@@ -1,3 +1,4 @@
+pip==24.2.0
 streamlit==1.26.0
 spotipy==2.23.0
 ytmusicapi==1.1.0
