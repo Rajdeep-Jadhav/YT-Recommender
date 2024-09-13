@@ -4,6 +4,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from ytmusicapi import YTMusic
 from fuzzywuzzy import fuzz
+from spotipy.oauth2 import SpotifyOAuth
+import urllib.parse as urlparse
 
 sofia_font = """
     <style>
