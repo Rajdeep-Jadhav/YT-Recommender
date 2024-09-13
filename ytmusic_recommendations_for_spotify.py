@@ -115,7 +115,7 @@ st.markdown("""
 st.markdown('<p class="big-font">Unleash Music Across Platforms</p>', unsafe_allow_html=True)
 
 # Input for Spotify playlist link
-playlist_link = st.text_input('',placeholder="Paste your Spotify playlist link here...")
+playlist_link = st.text_input(' ',placeholder="Paste your Spotify playlist link here...")
 
 if playlist_link:
     try:
