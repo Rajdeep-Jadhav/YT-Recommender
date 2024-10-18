@@ -8,8 +8,7 @@ S2Y is a web-based application that allows users to input a Spotify playlist lin
 - [Installation](#installation)
 - [Spotify API Setup](#spotify-api-setup)
 - [First-Time Setup with Spotify Authentication](#first-time-setup-with-spotify-authentication)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## Features
 - **Spotify Playlist Analysis:** Input a Spotify playlist link to retrieve track details such as artist, album, and audio features.
@@ -66,6 +65,12 @@ To use this app, you need to create Spotify API credentials and configure a redi
 ## First-Time Setup with Spotify Authentication
 If this is your first time running the app, follow these additional steps to authenticate with Spotify:
 
+## Run the Streamlit App
+To start the app, open your terminal and use the following command:
+```bash
+   streamlit run app.py
+```
+
 1. **Spotify Authentication:**
    - When you run the app for the first time, Spotify will prompt you to authenticate your app.
    - A new browser tab will open, where you must log in to Spotify and grant the necessary permissions.
@@ -74,4 +79,5 @@ If this is your first time running the app, follow these additional steps to aut
 2. **Provide the Redirect URL:**
    - Copy the URL from the browser's address bar after the redirection (even if it shows an error).
    - Paste it back into the terminal where Streamlit is running.
+     
 
