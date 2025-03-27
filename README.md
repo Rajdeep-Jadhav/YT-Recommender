@@ -1,5 +1,4 @@
-# Spotify Playlist YouTube Music Recommender
-
+# *Youtube Recommendations for spotify playlist*
 ## 📌 Project Overview
 
 This Flask-based web application allows users to input a Spotify playlist URL and receive personalized YouTube Music recommendations based on the tracks in the playlist.
