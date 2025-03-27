@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Recommendations for Spotify</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5dc; /* Light beige background */
+            margin: 0;
+            padding: 20px;
+            color: #5b4636; /* Dark brown text */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fffaf0; /* Off-white background for container */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #5b4636;
+            text-align: center;
+        }
+        .error {
+            color: #d9534f; /* Light red for error messages */
+        }
+        .recommendation {
+            margin-top: 30px;
+        }
+        .thumbnail {
+            width: 80px;
+            height: auto;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+        .recommendation-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f5f5dc; /* Light beige */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .recommendation-item div {
+            color: #5b4636;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #d3c4b1;
+            border-radius: 8px;
+            margin-top: 10px;
+            background-color: #fffaf0;
+            color: #5b4636;
+        }
+        button {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #a67c52; /* Warm brown */
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #8b5e3c; /* Darker brown on hover */
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        /* Custom styles for the links */
+        a {
+            color: #5b4636; /* Dark brown text color */
+            text-decoration: none; /* Remove underline */
+        }
+        a:hover {
+            text-decoration: underline; /* Add underline on hover for clarity */
+            color: #8b5e3c; /* Darker brown on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Syncify</h1>
+        <p align="center">YT Music Recommendations For Your Spotify Playlists</p>
+        <form method="POST">
+            <input type="text" name="playlist_link" placeholder="Paste your Spotify playlist link here..." required>
+            <button type="submit">Get Recommendations</button>
+        </form>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if recommendations %}
+            <div class="recommendation">
+                <h2>Top 10 Recommendations:</h2>
+                <ul>
+                    {% for rec in recommendations %}
+                        <li class="recommendation-item">
+                            <img src="{{ rec.thumbnail }}" alt="Thumbnail" class="thumbnail">
+                            <div>
+                                <strong><a href="{{ rec.spotify_url }}" target="_blank">{{ rec.title }}</a></strong> by {{ rec.artist }}<br>
+                                <small>Album: {{ rec.album }}</small>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
