@@ -37,7 +37,7 @@ source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
 
 ### 3. Install Dependencies
 ```bash
-pip install flask spotipy ytmusicapi fuzzywuzzy python-dotenv
+pip install -r requirements.txt
 ```
 
 ### 4. Set Up Environment Variables
