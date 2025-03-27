@@ -12,7 +12,7 @@ This Flask-based web application allows users to input a Spotify playlist URL an
 - Filter and rank recommendations based on similarity and popularity
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/03aa3e17-6326-4f1d-a068-c386773afd1a" alt="Project Image" width="400"/>
+  <img src="https://github.com/user-attachments/assets/03aa3e17-6326-4f1d-a068-c386773afd1a" alt="Project Image" width="1000"/>
 </div>
 
 ## 🛠 Prerequisites
