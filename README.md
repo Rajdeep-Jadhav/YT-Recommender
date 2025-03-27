@@ -11,7 +11,9 @@ This Flask-based web application allows users to input a Spotify playlist URL an
 - Generate YouTube Music recommendations
 - Filter and rank recommendations based on similarity and popularity
 
-![image](https://github.com/user-attachments/assets/03aa3e17-6326-4f1d-a068-c386773afd1a)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/03aa3e17-6326-4f1d-a068-c386773afd1a" alt="Project Image" width="400"/>
+</div>
 
 ## 🛠 Prerequisites
 
