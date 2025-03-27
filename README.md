@@ -11,6 +11,8 @@ This Flask-based web application allows users to input a Spotify playlist URL an
 - Generate YouTube Music recommendations
 - Filter and rank recommendations based on similarity and popularity
 
+![image](https://github.com/user-attachments/assets/03aa3e17-6326-4f1d-a068-c386773afd1a)
+
 ## 🛠 Prerequisites
 
 - Python 3.8+
@@ -73,30 +75,6 @@ Navigate to `http://localhost:5000` in your web browser.
 - YTMusicAPI
 - FuzzyWuzzy (String Matching)
 
-## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
-## ⚠️ Limitations
 
-- Requires active internet connection
-- Recommendation accuracy depends on track metadata
-- Limited by Spotify and YouTube Music API constraints
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🐛 Issues
-
-Report issues at [GitHub Issues](https://github.com/yourusername/spotify-youtube-recommender/issues)
-
-## 📞 Contact
-
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/yourusername/spotify-youtube-recommender](https://github.com/yourusername/spotify-youtube-recommender)
