@@ -1,0 +1,5 @@
+input youy keys 
+SECRET_KEY= xxxxxxx
+SPOTIPY_CLIENT_ID= xxxxxxx
+SPOTIPY_CLIENT_SECRET= xxxxxxx
+SPOTIPY_REDIRECT_URI= http://localhost:5000/callback
