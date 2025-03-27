@@ -1,38 +1,35 @@
-import streamlit as st
+from flask import Flask, request, render_template, redirect, url_for, session
 from collections import defaultdict
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from ytmusicapi import YTMusic
 from fuzzywuzzy import fuzz
+import os
+from dotenv import load_dotenv
 
-sofia_font = """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
-    html, body, [class*="css"] {
-        font-family: 'Nunito', sans-serif;
-    }
-    </style>
-    """
-st.markdown(sofia_font, unsafe_allow_html=True)
+# Load environment variables from .env file
+load_dotenv()
 
-# Add custom HTML for the header
-st.markdown('<div class="header">S2Y</div>', unsafe_allow_html=True)
-SPOTIPY_CLIENT_ID = ''
-SPOTIPY_CLIENT_SECRET = ''
-SPOTIPY_REDIRECT_URI = 'https://localhost:5000/callback'
+# Flask app initialization
+app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")  # Use the secret key from .env
+
+# Spotify credentials
+SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
+SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
+SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
 
 scope = "playlist-read-private"
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
-                                               client_secret=SPOTIPY_CLIENT_SECRET,
-                                               redirect_uri=SPOTIPY_REDIRECT_URI,
-                                               scope=scope))
+sp_oauth = SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
+                        client_secret=SPOTIPY_CLIENT_SECRET,
+                        redirect_uri=SPOTIPY_REDIRECT_URI,
+                        scope=scope)
 
 # YouTube Music API initialization
 ytmusic = YTMusic()
 
-
 # Function to get tracks from a Spotify playlist
-def get_spotify_tracks(playlist_id):
+def get_spotify_tracks(playlist_id, sp):
     results = sp.playlist_tracks(playlist_id)
     tracks = results.get('items', [])
 
@@ -50,26 +47,8 @@ def get_spotify_tracks(playlist_id):
 
     return song_list
 
-
-# Function to get Spotify song's audio features
-def get_audio_features(spotify_tracks):
-    track_ids = [track['id'] for track in spotify_tracks]
-    audio_features = sp.audio_features(track_ids)
-
-    features_dict = {}
-    for track, features in zip(spotify_tracks, audio_features):
-        if features:
-            features_dict[track['id']] = {
-                'danceability': features['danceability'],
-                'energy': features['energy'],
-                'tempo': features['tempo'],
-                'valence': features['valence']
-            }
-    return features_dict
-
-
 # Function to get song recommendations from YouTube Music
-def get_youtube_music_recommendations(song_name, artist_name):
+def get_youtube_music_recommendations(song_name, artist_name, track_id):
     search_results = ytmusic.search(f'{song_name} {artist_name}', filter='songs')
     recommendations = []
 
@@ -80,129 +59,104 @@ def get_youtube_music_recommendations(song_name, artist_name):
             else:
                 artist = 'Unknown Artist'
 
-            if fuzz.ratio(result['title'].lower(), song_name.lower()) > 90 and fuzz.ratio(artist.lower(),
-                                                                                          artist_name.lower()) > 90:
+            if fuzz.ratio(result['title'].lower(), song_name.lower()) > 90 and fuzz.ratio(artist.lower(), artist_name.lower()) > 90:
                 continue  # Skip exact matches
 
             thumbnail = result['thumbnails'][0]['url'] if 'thumbnails' in result else None
+
+            # Construct Spotify URL using the provided track_id
+            spotify_url = f"https://open.spotify.com/track/{track_id}"
 
             recommendations.append({
                 'title': result['title'],
                 'artist': artist,
                 'album': result.get('album', {}).get('name', 'N/A'),
                 'thumbnail': thumbnail,
-                'views': result.get('views', '0')  # You can use views as a proxy for popularity
+                'views': result.get('views', '0'),  # Use views as a proxy for popularity
+                'spotify_url': spotify_url  # Add Spotify URL here
             })
 
-    # Sort recommendations by popularity (views)
-    recommendations = sorted(recommendations, key=lambda x: int(x['views'].replace(',', '')), reverse=True)
+    return recommendations
 
-    return recommendations[:5]  # Return top 5 recommendations
+# Function to filter out duplicates and get top recommendations
+def filter_and_get_top_recommendations(spotify_tracks, all_recommendations):
+    recommendation_count = defaultdict(int)
+    playlist_songs = set(f"{track['name'].lower()} by {track['artist'].lower()}" for track in spotify_tracks)
 
+    for rec in all_recommendations:
+        rec_key = f"{rec['title'].lower()} by {rec['artist'].lower()}"
+        if rec_key not in playlist_songs:
+            recommendation_count[rec_key] += 1
 
-# Streamlit App Interface
-st.title("YouTube Music Recommendations for Spotify")
-st.markdown("""
-    <style>
-    .big-font {
-        font-size:30px !important;
-        color: #FFA500;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Get top 10 recommendations based on count
+    top_recommendations = sorted(recommendation_count.items(), key=lambda x: x[1], reverse=True)[:10]
 
-st.markdown('<p class="big-font">Unleash Music Across Platforms</p>', unsafe_allow_html=True)
+    # Prepare the final list of recommendations
+    final_recommendations = []
+    for rec_key, _ in top_recommendations:
+        song_title, song_artist = rec_key.split(" by ")
+        rec_info = next((rec for rec in all_recommendations if rec['title'].lower() == song_title and rec['artist'].lower() == song_artist), None)
+        if rec_info:
+            final_recommendations.append(rec_info)
 
-# Input for Spotify playlist link
-playlist_link = st.text_input(' ',placeholder="Paste your Spotify playlist link here...")
+    return final_recommendations
 
-if playlist_link:
+# Home route
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        playlist_link = request.form.get('playlist_link')
+
+        if playlist_link:
+            try:
+                # Store the playlist link in the session
+                session['playlist_link'] = playlist_link
+
+                # Get Spotify authorization URL
+                auth_url = sp_oauth.get_authorize_url()
+                return redirect(auth_url)
+
+            except Exception as e:
+                return render_template('index.html', error=f"Error: {str(e)}")
+
+    return render_template('index.html')
+
+@app.route('/callback')
+def callback():
     try:
-        # Extract the playlist ID from the URL
+        # Get the playlist link from the session
+        playlist_link = session.get('playlist_link')
+        if not playlist_link:
+            return render_template('index.html', error="Playlist link not found in session.")
+
+        session_token = sp_oauth.get_access_token(request.args['code'])
+        sp = spotipy.Spotify(auth=session_token['access_token'])
+
+        # Use the Spotify client to fetch tracks from the Spotify playlist
         SPOTIFY_PLAYLIST_ID = playlist_link.split("/")[-1].split("?")[0]
+        spotify_tracks = get_spotify_tracks(SPOTIFY_PLAYLIST_ID, sp)
 
-        # Fetch tracks from the Spotify playlist
-        spotify_tracks = get_spotify_tracks(SPOTIFY_PLAYLIST_ID)
         if not spotify_tracks:
-            st.write("No tracks found in the playlist.")
+            return render_template('index.html', error="No tracks found in the playlist.")
         else:
-            # Get audio features of the Spotify tracks
-            spotify_audio_features = get_audio_features(spotify_tracks)
-
-            # Dictionary to store song counts
-            song_count = defaultdict(int)
-            playlist_songs = set(f"{track['name'].lower()} by {track['artist'].lower()}" for track in spotify_tracks)
+            all_recommendations = []
 
             # Get YouTube Music recommendations for each song from the Spotify playlist
             for track in spotify_tracks:
                 song_name = track['name']
                 artist_name = track['artist']
+                track_id = track['id']
+                youtube_recommendations = get_youtube_music_recommendations(song_name, artist_name, track_id)
+                all_recommendations.extend(youtube_recommendations)
 
-                youtube_recommendations = get_youtube_music_recommendations(song_name, artist_name)
+            top_recommendations = filter_and_get_top_recommendations(spotify_tracks, all_recommendations)
 
-                for rec in youtube_recommendations:
-                    rec_title = rec['title']
-                    rec_artist = rec['artist']
-                    rec_key = f"{rec_title.lower()} by {rec_artist.lower()}"
-
-                    if rec_key not in playlist_songs:
-                        song_count[rec_key] += 1  # Increment the count for this song
-
-            # Zero out counts for songs that are in the playlist
-            for track in spotify_tracks:
-                song_key = f"{track['name'].lower()} by {track['artist'].lower()}"
-                song_count[song_key] = 0
-
-            # Sort the dictionary by value and get the top 10 new songs
-            top_songs = sorted(song_count.items(), key=lambda item: item[1], reverse=True)[:10]
-
-            # Display Top 10
-            st.subheader("Youtube Recommendation")
-
-            for song, count in top_songs:
-                if count > 0:
-                    # Extract the title and artist from the song key
-                    song_title, song_artist = song.split(" by ")
-
-                    # Search for the song on Spotify to get album cover and Spotify link
-                    search_results = sp.search(q=f"{song_title} {song_artist}", type='track', limit=1)
-                    if search_results['tracks']['items']:
-                        track_info = search_results['tracks']['items'][0]
-                        album_cover = track_info['album']['images'][0]['url']  # Get album cover URL
-                        spotify_url = track_info['external_urls']['spotify']  # Get Spotify URL
-
-                        # Use columns to display the album cover and the song info side by side
-                        col1, col2 = st.columns([1, 4])
-                        with col1:
-                            # Display album cover
-                            st.image(album_cover, width=100)
-
-                        with col2:
-                            # Display song information and link to Spotify
-                            st.markdown(f"**[{song_title}]({spotify_url})** by {song_artist}")
-                    else:
-                        st.write(f"🎵 {song}")
+            # Display only the top 10 recommendations
+            return render_template('index.html', recommendations=top_recommendations)
 
     except Exception as e:
-        st.write(f"Error: {e}")
+        return render_template('index.html', error=f"Error: {str(e)}")
 
-# CSS for footer styling
-footer = """
-    <style>
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: transparent;
-        color: white    ;
-        text-align: right;
-        padding: 10px;
-        font-size: 16px;
-    }
-    </style>
-    <div class="footer">
-        <p>Made By: <b>Rajdeep Jadhav</b></p>
-    </div>
-    """
-st.markdown(footer, unsafe_allow_html=True)
+# Run the app
+if __name__ == '__main__':
+    app.run(debug=True)
